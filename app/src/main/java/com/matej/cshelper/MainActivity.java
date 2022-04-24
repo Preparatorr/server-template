@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.widget.Toolbar;
 
 import com.google.android.material.navigation.NavigationView;
+import com.matej.cshelper.db.DBDataManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-
+        DBDataManager.getInstance().Init();
 
     }
 

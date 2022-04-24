@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+
 public class BuildFragment extends Fragment {
 
     private View parentView;
@@ -18,8 +20,11 @@ public class BuildFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+
+
         parentView = inflater.inflate(R.layout.fragment_build, container, false);
         return parentView;
     }
+
+
 }
