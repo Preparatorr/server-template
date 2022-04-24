@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_navigation"
+    app:startDestination="@id/homeFragment">
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.matej.cshelper.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_homeFragment_to_controlFragment"
+            app:destination="@id/controlFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_buildFragment"
+            app:destination="@id/buildFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/buildFragment"
+        android:name="com.matej.cshelper.BuildFragment"
+        android:label="fragment_build"
+        tools:layout="@layout/fragment_build" >
+        <action
+            android:id="@+id/action_buildFragment_to_controlFragment"
+            app:destination="@id/controlFragment" />
+        <action
+            android:id="@+id/action_buildFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/controlFragment"
+        android:name="com.matej.cshelper.ControlFragment"
+        android:label="fragment_control"
+        tools:layout="@layout/fragment_control" >
+        <action
+            android:id="@+id/action_controlFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+        <action
+            android:id="@+id/action_controlFragment_to_buildFragment"
+            app:destination="@id/buildFragment" />
+    </fragment>
+</navigation>
