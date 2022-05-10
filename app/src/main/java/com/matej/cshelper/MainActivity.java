@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
                 drawerLayout.closeDrawer(GravityCompat.START);
                 switch (id) {
                     case R.id.nav_home:
-                        Navigation.findNavController(findViewById(R.id.fragmentContainerView)).navigate(R.id.homeFragment);
+                        Navigation.findNavController(findViewById(R.id.fragmentContainerView)).navigate(R.id.homeFragment,new Bundle());
                         break;
                     case R.id.nav_build:
                         Navigation.findNavController(findViewById(R.id.fragmentContainerView)).navigate(R.id.buildFragment);
@@ -61,5 +61,8 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    public void setActionBarTitle(String title){
+        setTitle(title);
     }
 }

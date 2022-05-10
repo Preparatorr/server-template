@@ -6,24 +6,43 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.common.reflect.TypeToken;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 public class DBDataManager {
+
+    public class GlobalComponentsConfig
+    {
+        public HashMap<String, ArrayList<String>> components_config;
+    }
+
+    public class ServerTemplate
+    {
+        public long id;
+        public String displayName;
+        public ArrayList<TemplateItem> server_build;
+    }
+
+    public class TemplateItem
+    {
+        public String name;
+        public String displayName;
+        public String count;
+    }
 
     private static final String TAG = "DBDataManager";
     private static DBDataManager instance = null;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     private boolean downloaded = false;
-    private Map<String, ArrayList<String>> globalComponents = new HashMap<>();
 
     public boolean isInitialized() {
         return downloaded;
@@ -36,16 +55,9 @@ public class DBDataManager {
         return instance;
     }
 
-    public Map<String, ArrayList<String>> getGlobalComponents(){
-        if (downloaded)
-            return globalComponents;
-        else
-            return null;
-    }
-
     public void Init() {
-        DocumentReference docRef = db.collection("configs").document("global_config");
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        DocumentReference globalConfigDoc = db.collection("configs").document("global_config");
+        globalConfigDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
@@ -61,16 +73,36 @@ public class DBDataManager {
                 }
             }
         });
+        CollectionReference templatesDoc = db.collection("server-templates");
+        templatesDoc.get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                //Log.i(TAG, document.getId() + " => " + document.getData());
+                                saveBuildTemplate(document.getData().get("file").toString());
+                            }
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+
     }
 
     private void saveGlobalConfig(String config){
-        Map<String, Object> result = new Gson().fromJson(
-                config, new TypeToken<HashMap<String, Object>>() {}.getType()
-        );
-        String componentsConfig = result.get("components_config").toString();
-        Log.i(TAG, "CPU = : " + (result.get("components_config")).get("cpu"));
-        Log.i(TAG, "saveGlobalConfig: " + componentsConfig);
+        Log.i(TAG, "Downloaded config: " + config);
+        Gson gson = new Gson();
+        GlobalComponentsConfig globalComponentsConfig = gson.fromJson(config, GlobalComponentsConfig.class);
+        ServerTemplates.getInstance().setGlobalComponents(globalComponentsConfig);
+        downloaded = true;
+    }
 
-
+    private void saveBuildTemplate(String templateString) {
+        Log.i(TAG, "Downloaded templates: " + templateString);
+        Gson gson = new Gson();
+        ServerTemplate template = gson.fromJson(templateString, ServerTemplate.class);
+        ServerTemplates.getInstance().addBuildTemplate(template);
     }
 }

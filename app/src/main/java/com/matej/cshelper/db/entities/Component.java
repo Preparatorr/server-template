@@ -1,6 +1,10 @@
 package com.matej.cshelper.db.entities;
 
+import java.util.HashMap;
+
 public class Component {
-    private String name;
+    public String name;
+    public int count;
+    public HashMap<String, String> additionalFields;
 
 }
