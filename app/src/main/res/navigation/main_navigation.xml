@@ -40,4 +40,9 @@
             android:id="@+id/action_controlFragment_to_buildFragment"
             app:destination="@id/buildFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/fillTemplateFragment"
+        android:name="com.matej.cshelper.FillTemplateFragment"
+        android:label="fragment_fill_template"
+        tools:layout="@layout/fragment_fill_template" />
 </navigation>
