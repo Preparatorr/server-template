@@ -3,11 +3,16 @@ package com.matej.cshelper;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.matej.cshelper.db.ServerTemplates;
+import com.matej.cshelper.uihelpers.TemplateAdapter;
 
 public class FillTemplateFragment extends Fragment {
 
@@ -32,7 +37,12 @@ public class FillTemplateFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView " + this.templateID);
-
-        return inflater.inflate(R.layout.fragment_fill_template, container, false);
+        View parentView = inflater.inflate(R.layout.fragment_fill_template, container, false);
+        RecyclerView recyclerView = parentView.findViewById(R.id.components_list);
+        recyclerView.setAdapter(new TemplateAdapter(ServerTemplates.getInstance().getBuildTemplate(this.templateID)));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        return parentView;
     }
 }

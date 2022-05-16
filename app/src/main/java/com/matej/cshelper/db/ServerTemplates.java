@@ -37,11 +37,11 @@ public class ServerTemplates {
         templateItems.add(serverTemplate);
     }
 
-    public DBDataManager.ServerTemplate getBuildTemplate(int index) {
+    public DBDataManager.ServerTemplate getBuildTemplate(long index) {
         if (templateItems == null) {
             return null;
         }
-        return templateItems.get(index);
+        return templateItems.get((int)index);
     }
 
     public ArrayList<DBDataManager.ServerTemplate> getBuildTemplates() {

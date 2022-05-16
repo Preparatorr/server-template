@@ -35,7 +35,17 @@ public class DBDataManager {
     {
         public String name;
         public String displayName;
-        public String count;
+        public int count;
+        public TemplateItem Clone()
+        {
+            return new TemplateItem(name, displayName, count);
+        }
+        public TemplateItem(String name, String displayName, int count)
+        {
+            this.name = name;
+            this.displayName = displayName;
+            this.count = count;
+        }
     }
 
     private static final String TAG = "DBDataManager";
