@@ -19,6 +19,8 @@ import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
 import com.matej.cshelper.db.DBDataManager;
 import com.matej.cshelper.db.ServerTemplates;
+import com.matej.cshelper.db.entities.BuildDraft;
+import com.matej.cshelper.db.entities.FilledComponent;
 import com.matej.cshelper.db.entities.TemplateItem;
 import com.matej.cshelper.uihelpers.TemplateAdapter;
 
@@ -43,8 +45,15 @@ public class FillTemplateFragment extends Fragment {
         if (getArguments() != null) {
             this.templateID = getArguments().getLong(ARG_TEMPLATE_ID);
         }
+        Log.i(TAG, "onCreate " + this.templateID);
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.i(TAG, "onPause");
+        saveTemplate();
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -57,8 +66,10 @@ public class FillTemplateFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
+        getOrderID();
         getMissingComponents(serverTemplate,adapter);
         componentsList = recyclerView;
+        Log.i(TAG, "onCreateView " + this.templateID + " finished");
         return parentView;
     }
 
@@ -73,8 +84,8 @@ public class FillTemplateFragment extends Fragment {
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        component.count = Integer.parseInt(input.getText().toString());
-                        for (int i = 0; i < component.count; i++) {
+                        int componentCount = Integer.parseInt(input.getText().toString());
+                        for (int i = 0; i < componentCount; i++) {
                             String newName = component.displayName + " " + (i + 1);
                             adapter.getComponents().add(new TemplateItem(component.name, newName, 1));
                         }
@@ -83,7 +94,27 @@ public class FillTemplateFragment extends Fragment {
                 });
                 builder.show();
             }
-
         }
     }
+
+    private void getOrderID(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Enter order number ");
+        final EditText input = new EditText(getContext());
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String orderID = input.getText().toString();
+                adapter.activeDraft.orderID = orderID;
+            }
+        });
+        builder.show();
+    }
+
+    private void saveTemplate() {
+        DBDataManager.getInstance().saveBuildReport(adapter.activeDraft.orderID, adapter.activeDraft.toString());
+    }
+
 }

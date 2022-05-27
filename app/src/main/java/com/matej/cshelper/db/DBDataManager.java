@@ -85,6 +85,12 @@ public class DBDataManager {
 
     }
 
+    public void saveBuildReport(String ID, String report) {
+        HashMap<String, String> entry = new HashMap<>();
+        entry.put("report", report);
+        db.collection("build-reports").document(ID).set(entry);
+    }
+
     private void saveGlobalConfig(String config){
         Log.i(TAG, "Downloaded config: " + config);
         Gson gson = new Gson();

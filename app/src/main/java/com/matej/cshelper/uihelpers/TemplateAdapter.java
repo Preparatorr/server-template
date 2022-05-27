@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.matej.cshelper.R;
 import com.matej.cshelper.db.DBDataManager;
 import com.matej.cshelper.db.ServerTemplates;
+import com.matej.cshelper.db.entities.BuildDraft;
+import com.matej.cshelper.db.entities.FilledComponent;
 import com.matej.cshelper.db.entities.TemplateItem;
 
 import java.lang.reflect.Array;
@@ -28,6 +30,8 @@ public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.Templa
     private DBDataManager.ServerTemplate template;
     private ArrayList<TemplateItem> components;
     private HashMap<String,ArrayList<String>> config;
+
+    public BuildDraft activeDraft;
 
     public class TemplateViewHolder extends RecyclerView.ViewHolder {
         private final TextView componentName;
@@ -49,6 +53,7 @@ public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.Templa
 
     public TemplateAdapter(DBDataManager.ServerTemplate template) {
         this.components = new ArrayList<>();
+        this.activeDraft = new BuildDraft();
         for (TemplateItem item : template.server_build) {
             for (int i = 1; i <= item.count; i++) {
                 this.components.add(item.Clone());
@@ -68,6 +73,7 @@ public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.Templa
     public TemplateViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.server_template_item, parent, false);
+        Log.i(TAG, "onCreateViewHolder: " + components.size());
         return new TemplateViewHolder(view);
     }
 
@@ -75,6 +81,16 @@ public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.Templa
     public void onBindViewHolder(@NonNull TemplateViewHolder holder, int position) {
         TemplateItem item = components.get(position);
         holder.getComponentName().setText(item.displayName);
+
+        if(!activeDraft.components.containsKey(position)){
+            FilledComponent filledComponent = new FilledComponent(item.displayName, new HashMap<>());
+            ArrayList<String> checkListItems = config.get(item.name);
+            for (String checkListItem : checkListItems) {
+                if(!filledComponent.fields.containsKey(checkListItem))
+                    filledComponent.fields.put(checkListItem, false);
+            }
+            activeDraft.components.put(position,filledComponent);
+        }
         Log.i(TAG, "onBindViewHolder: " + item.displayName);
         LinearLayout checkList = holder.getComponentCheckList();
         checkList.removeAllViews();
@@ -82,6 +98,10 @@ public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.Templa
         for (String checkListItem : checkListItems) {
             CheckBox checkBox = new CheckBox(checkList.getContext());
             checkBox.setText(checkListItem);
+            checkBox.setChecked(activeDraft.components.get(position).fields.get(checkListItem));
+            checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                activeDraft.components.get(position).fields.put(checkListItem, isChecked);
+                    });
             ColorStateList colorStateList = new ColorStateList(
                     new int[][]{
                             new int[]{android.R.attr.state_enabled} //enabled
