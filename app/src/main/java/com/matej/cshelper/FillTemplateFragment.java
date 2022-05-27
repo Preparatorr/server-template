@@ -19,6 +19,7 @@ import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
 import com.matej.cshelper.db.DBDataManager;
 import com.matej.cshelper.db.ServerTemplates;
+import com.matej.cshelper.db.entities.TemplateItem;
 import com.matej.cshelper.uihelpers.TemplateAdapter;
 
 import java.util.concurrent.ExecutionException;
@@ -29,6 +30,8 @@ public class FillTemplateFragment extends Fragment {
     private static final String ARG_TEMPLATE_ID = "templateId";
 
     private long templateID;
+    private TemplateAdapter adapter;
+    private RecyclerView componentsList;
 
     public FillTemplateFragment() {
         // Required empty public constructor
@@ -49,17 +52,18 @@ public class FillTemplateFragment extends Fragment {
         View parentView = inflater.inflate(R.layout.fragment_fill_template, container, false);
         RecyclerView recyclerView = parentView.findViewById(R.id.components_list);
         DBDataManager.ServerTemplate serverTemplate = ServerTemplates.getInstance().getBuildTemplate(this.templateID);
-        TemplateAdapter adapter = new TemplateAdapter(serverTemplate);
+        this.adapter = new TemplateAdapter(serverTemplate);
         recyclerView.setAdapter(adapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
         getMissingComponents(serverTemplate,adapter);
+        componentsList = recyclerView;
         return parentView;
     }
 
     private void getMissingComponents(DBDataManager.ServerTemplate serverTemplate, TemplateAdapter adapter) {
-        for (DBDataManager.TemplateItem component : serverTemplate.server_build) {
+        for (TemplateItem component : serverTemplate.server_build) {
             if (component.count == -1) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setTitle("Enter number of " + component.displayName + "s");
@@ -70,10 +74,14 @@ public class FillTemplateFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         component.count = Integer.parseInt(input.getText().toString());
+                        for (int i = 0; i < component.count; i++) {
+                            String newName = component.displayName + " " + (i + 1);
+                            adapter.getComponents().add(new TemplateItem(component.name, newName, 1));
+                        }
+                        componentsList.setAdapter(adapter);
                     }
                 });
                 builder.show();
-                adapter.notifyDataSetChanged();
             }
 
         }

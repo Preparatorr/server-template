@@ -13,6 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
+import com.matej.cshelper.db.entities.TemplateItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,23 +30,6 @@ public class DBDataManager {
         public long id;
         public String displayName;
         public ArrayList<TemplateItem> server_build;
-    }
-
-    public class TemplateItem
-    {
-        public String name;
-        public String displayName;
-        public int count;
-        public TemplateItem Clone()
-        {
-            return new TemplateItem(name, displayName, count);
-        }
-        public TemplateItem(String name, String displayName, int count)
-        {
-            this.name = name;
-            this.displayName = displayName;
-            this.count = count;
-        }
     }
 
     private static final String TAG = "DBDataManager";

@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.matej.cshelper.R;
 import com.matej.cshelper.db.DBDataManager;
 import com.matej.cshelper.db.ServerTemplates;
+import com.matej.cshelper.db.entities.TemplateItem;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.Templa
 
     private static final String TAG = "TemplateAdapter";
     private DBDataManager.ServerTemplate template;
-    private ArrayList<DBDataManager.TemplateItem> components;
+    private ArrayList<TemplateItem> components;
     private HashMap<String,ArrayList<String>> config;
 
     public class TemplateViewHolder extends RecyclerView.ViewHolder {
@@ -48,7 +49,7 @@ public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.Templa
 
     public TemplateAdapter(DBDataManager.ServerTemplate template) {
         this.components = new ArrayList<>();
-        for (DBDataManager.TemplateItem item : template.server_build) {
+        for (TemplateItem item : template.server_build) {
             for (int i = 1; i <= item.count; i++) {
                 this.components.add(item.Clone());
                 if(item.count > 1){
@@ -72,7 +73,7 @@ public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.Templa
 
     @Override
     public void onBindViewHolder(@NonNull TemplateViewHolder holder, int position) {
-        DBDataManager.TemplateItem item = components.get(position);
+        TemplateItem item = components.get(position);
         holder.getComponentName().setText(item.displayName);
         Log.i(TAG, "onBindViewHolder: " + item.displayName);
         LinearLayout checkList = holder.getComponentCheckList();
@@ -95,5 +96,9 @@ public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.Templa
     @Override
     public int getItemCount() {
         return components.size();
+    }
+
+    public ArrayList<TemplateItem> getComponents(){
+        return components;
     }
 }
