@@ -6,4 +6,5 @@
     <string name="menu_control">Export Control</string>
     <string name="menu_open">Open</string>
     <string name="menu_close">Close</string>
+    <string name="finish_template">Finish</string>
 </resources>

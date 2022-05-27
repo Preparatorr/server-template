@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -54,10 +56,20 @@ public class FillTemplateFragment extends Fragment {
         Log.i(TAG, "onPause");
         saveTemplate();
     }
+
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.server_build_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView " + this.templateID);
+        setHasOptionsMenu(true);
         View parentView = inflater.inflate(R.layout.fragment_fill_template, container, false);
         RecyclerView recyclerView = parentView.findViewById(R.id.components_list);
         DBDataManager.ServerTemplate serverTemplate = ServerTemplates.getInstance().getBuildTemplate(this.templateID);
