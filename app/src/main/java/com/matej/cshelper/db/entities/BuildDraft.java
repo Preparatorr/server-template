@@ -11,7 +11,8 @@ public class BuildDraft {
     boolean finished = false;
     public HashMap<Integer,FilledComponent> components;
 
-    public BuildDraft() {
+    public BuildDraft(long templateID){
+        this.templateID = templateID;
         components = new HashMap<>();
     }
 

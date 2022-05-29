@@ -1,6 +1,8 @@
 package com.matej.cshelper;
 
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
@@ -20,6 +22,7 @@ import android.widget.EditText;
 
 import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
+import com.google.gson.Gson;
 import com.matej.cshelper.db.DBDataManager;
 import com.matej.cshelper.db.ServerTemplates;
 import com.matej.cshelper.db.entities.BuildDraft;
@@ -49,6 +52,10 @@ public class FillTemplateFragment extends Fragment {
             this.templateID = getArguments().getLong(ARG_TEMPLATE_ID);
         }
         Log.i(TAG, "onCreate " + this.templateID);
+
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("drafts", Context.MODE_PRIVATE);
+        String savedOrder = sharedPreferences.getString("ahoj123", "null");
+        Log.i(TAG, "savedOrder: " + savedOrder);
     }
 
     @Override
@@ -140,6 +147,14 @@ public class FillTemplateFragment extends Fragment {
     private void saveTemplate() {
         adapter.activeDraft.templateID = this.templateID;
         Log.i(TAG, "saveTemplate: " + adapter.activeDraft.toString());
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences("drafts", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        editor.putString(adapter.activeDraft.orderID, gson.toJson(adapter.activeDraft));
+        editor.commit();
+    }
+
+    private void uploadTemplate(){
         DBDataManager.getInstance().saveBuildReport(adapter.activeDraft.orderID, adapter.activeDraft.toString());
     }
 

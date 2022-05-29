@@ -8,5 +8,10 @@
             android:title="@string/finish_template"
             balloonberry:showAsAction="always"
             android:icon="@drawable/ic_baseline_check_24" />
+
+        <item android:id="@+id/send_to_redmine"
+            android:title="@string/send_to_redmine"
+            balloonberry:showAsAction="always"
+            android:icon="@drawable/ic_baseline_send_24" />
     </group>
 </menu>

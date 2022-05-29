@@ -53,7 +53,7 @@ public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.Templa
 
     public TemplateAdapter(DBDataManager.ServerTemplate template) {
         this.components = new ArrayList<>();
-        this.activeDraft = new BuildDraft();
+        this.activeDraft = new BuildDraft(template.id);
         for (TemplateItem item : template.server_build) {
             for (int i = 1; i <= item.count; i++) {
                 this.components.add(item.Clone());

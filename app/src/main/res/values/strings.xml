@@ -6,5 +6,7 @@
     <string name="menu_control">Export Control</string>
     <string name="menu_open">Open</string>
     <string name="menu_close">Close</string>
-    <string name="finish_template">Finish</string>
+    <string name="menu_saved">Saved Builds</string>
+    <string name="finish_template">Save Template</string>
+    <string name="send_to_redmine">Finish Template</string>
 </resources>
