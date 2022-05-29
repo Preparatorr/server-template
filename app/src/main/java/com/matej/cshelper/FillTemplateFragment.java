@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -54,7 +55,6 @@ public class FillTemplateFragment extends Fragment {
     public void onPause() {
         super.onPause();
         Log.i(TAG, "onPause");
-        saveTemplate();
     }
 
 
@@ -63,6 +63,18 @@ public class FillTemplateFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.server_build_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.finish_template:
+                saveTemplate();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -126,6 +138,8 @@ public class FillTemplateFragment extends Fragment {
     }
 
     private void saveTemplate() {
+        adapter.activeDraft.templateID = this.templateID;
+        Log.i(TAG, "saveTemplate: " + adapter.activeDraft.toString());
         DBDataManager.getInstance().saveBuildReport(adapter.activeDraft.orderID, adapter.activeDraft.toString());
     }
 

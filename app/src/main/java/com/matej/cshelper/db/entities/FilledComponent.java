@@ -11,4 +11,17 @@ public class FilledComponent {
         this.fields = fields;
     }
 
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for(String key : fields.keySet()) {
+            if(fields.get(key)) {
+                sb.append("\n    name: " + key + ": OK");
+            }
+            else{
+                sb.append("\n    name: " + key + ": NOT CHECKED");
+            }
+        }
+        return sb.toString();
+    }
+
 }
