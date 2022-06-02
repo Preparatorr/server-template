@@ -7,6 +7,8 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,9 +21,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.android.gms.tasks.Tasks;
+import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 import com.matej.cshelper.db.DBDataManager;
 import com.matej.cshelper.db.ServerTemplates;
@@ -30,14 +34,19 @@ import com.matej.cshelper.db.entities.FilledComponent;
 import com.matej.cshelper.db.entities.TemplateItem;
 import com.matej.cshelper.uihelpers.TemplateAdapter;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class FillTemplateFragment extends Fragment {
 
     private static final String TAG = "FillTemplateFragment";
-    private static final String ARG_TEMPLATE_ID = "templateId";
+    public static final String ARG_TEMPLATE_ID = "templateId";
+    public static final String ARG_SAVED_TEMPLATE = "SavedTemplate";
 
     private long templateID;
+    private boolean savedTemplate;
+    private String orderID;
     private TemplateAdapter adapter;
     private RecyclerView componentsList;
 
@@ -50,12 +59,10 @@ public class FillTemplateFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             this.templateID = getArguments().getLong(ARG_TEMPLATE_ID);
+            this.orderID = getArguments().getString(ARG_SAVED_TEMPLATE, null);
+            this.savedTemplate = this.orderID != null;
         }
         Log.i(TAG, "onCreate " + this.templateID);
-
-        SharedPreferences sharedPreferences = getContext().getSharedPreferences("drafts", Context.MODE_PRIVATE);
-        String savedOrder = sharedPreferences.getString("ahoj123", "null");
-        Log.i(TAG, "savedOrder: " + savedOrder);
     }
 
     @Override
@@ -79,6 +86,9 @@ public class FillTemplateFragment extends Fragment {
             case R.id.finish_template:
                 saveTemplate();
                 return true;
+            case R.id.upload_template:
+                uploadTemplate();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -90,15 +100,26 @@ public class FillTemplateFragment extends Fragment {
         Log.i(TAG, "onCreateView " + this.templateID);
         setHasOptionsMenu(true);
         View parentView = inflater.inflate(R.layout.fragment_fill_template, container, false);
+
+        if(savedTemplate) {
+            SharedPreferences sharedPreferences = getContext().getSharedPreferences("drafts", Context.MODE_PRIVATE);
+            Gson gson = new Gson();
+            BuildDraft order = gson.fromJson(sharedPreferences.getString(orderID, ""), BuildDraft.class);
+            this.adapter = new TemplateAdapter(order);
+            ((MainActivity) getActivity()).setActionBarTitle(orderID + " - " + ServerTemplates.getInstance().getBuildTemplate(templateID).displayName);
+
+        }
+        else {
+            DBDataManager.ServerTemplate serverTemplate = ServerTemplates.getInstance().getBuildTemplate(this.templateID);
+            this.adapter = new TemplateAdapter(serverTemplate);
+            getMissingComponents(serverTemplate,adapter);
+            getOrderID();
+        }
         RecyclerView recyclerView = parentView.findViewById(R.id.components_list);
-        DBDataManager.ServerTemplate serverTemplate = ServerTemplates.getInstance().getBuildTemplate(this.templateID);
-        this.adapter = new TemplateAdapter(serverTemplate);
         recyclerView.setAdapter(adapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
-        getOrderID();
-        getMissingComponents(serverTemplate,adapter);
         componentsList = recyclerView;
         Log.i(TAG, "onCreateView " + this.templateID + " finished");
         return parentView;
@@ -139,6 +160,7 @@ public class FillTemplateFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
                 String orderID = input.getText().toString();
                 adapter.activeDraft.orderID = orderID;
+                ((MainActivity) getActivity()).setActionBarTitle(orderID + " - " + ServerTemplates.getInstance().getBuildTemplate(templateID).displayName);
             }
         });
         builder.show();
@@ -151,11 +173,18 @@ public class FillTemplateFragment extends Fragment {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
         editor.putString(adapter.activeDraft.orderID, gson.toJson(adapter.activeDraft));
+        Log.i(TAG, "json: " + gson.toJson(adapter.activeDraft));
         editor.commit();
+        Toast.makeText(getContext(), adapter.activeDraft.orderID + " Saved", Toast.LENGTH_SHORT).show();
+        NavHostFragment.findNavController(this).navigate(R.id.savedDrafts);
     }
 
     private void uploadTemplate(){
+        adapter.activeDraft.finished = true;
+        saveTemplate();
         DBDataManager.getInstance().saveBuildReport(adapter.activeDraft.orderID, adapter.activeDraft.toString());
+        Toast.makeText(getContext(), adapter.activeDraft.orderID + " Uploaded", Toast.LENGTH_SHORT).show();
+        NavHostFragment.findNavController(this).navigate(R.id.savedDrafts);
     }
 
 }

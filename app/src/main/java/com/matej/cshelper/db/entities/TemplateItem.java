@@ -6,6 +6,12 @@ public class TemplateItem {
     public String name;
     public String displayName;
     public int count;
+
+    public TemplateItem(){
+        this.name = "";
+        this.displayName = "";
+        this.count = 0;
+    }
     public TemplateItem Clone()
     {
         return new TemplateItem(name, displayName, count);

@@ -6,12 +6,12 @@
 
         <item android:id="@+id/finish_template"
             android:title="@string/finish_template"
-            balloonberry:showAsAction="always"
-            android:icon="@drawable/ic_baseline_check_24" />
+            balloonberry:showAsAction="ifRoom"
+            android:icon="@drawable/ic_baseline_save_24" />
 
-        <item android:id="@+id/send_to_redmine"
+        <item android:id="@+id/upload_template"
             android:title="@string/send_to_redmine"
-            balloonberry:showAsAction="always"
+            balloonberry:showAsAction="ifRoom"
             android:icon="@drawable/ic_baseline_send_24" />
     </group>
 </menu>

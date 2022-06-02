@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,9 +19,9 @@ import com.matej.cshelper.db.entities.BuildDraft;
 import com.matej.cshelper.db.entities.FilledComponent;
 import com.matej.cshelper.db.entities.TemplateItem;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.TemplateViewHolder> {
 
@@ -30,6 +29,7 @@ public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.Templa
     private DBDataManager.ServerTemplate template;
     private ArrayList<TemplateItem> components;
     private HashMap<String,ArrayList<String>> config;
+    private boolean savedDraft = false;
 
     public BuildDraft activeDraft;
 
@@ -66,6 +66,15 @@ public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.Templa
         }
         this.template = template;
         config = ServerTemplates.getInstance().getGlobalComponents().components_config;
+        this.savedDraft = false;
+    }
+
+    public TemplateAdapter(BuildDraft savedDraft) {
+        this.components = new ArrayList<>();
+        this.activeDraft = savedDraft;
+        this.template = ServerTemplates.getInstance().getBuildTemplate(savedDraft.templateID);
+        this.config = ServerTemplates.getInstance().getGlobalComponents().components_config;
+        this.savedDraft = true;
     }
 
     @NonNull
@@ -79,11 +88,18 @@ public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.Templa
 
     @Override
     public void onBindViewHolder(@NonNull TemplateViewHolder holder, int position) {
-        TemplateItem item = components.get(position);
-        holder.getComponentName().setText(item.displayName);
+        TemplateItem item = new TemplateItem();
+        if(savedDraft){
+            item.name = activeDraft.components.get(position).name;
+            item.displayName = activeDraft.components.get(position).displayName;
+        }
+        else{
+            item = components.get(position);
+        }
 
+        holder.getComponentName().setText(item.displayName);
         if(!activeDraft.components.containsKey(position)){
-            FilledComponent filledComponent = new FilledComponent(item.displayName, new HashMap<>());
+            FilledComponent filledComponent = new FilledComponent(item.name, item.displayName, new HashMap<>());
             ArrayList<String> checkListItems = config.get(item.name);
             for (String checkListItem : checkListItems) {
                 if(!filledComponent.fields.containsKey(checkListItem))
@@ -115,7 +131,10 @@ public class TemplateAdapter extends RecyclerView.Adapter<TemplateAdapter.Templa
 
     @Override
     public int getItemCount() {
-        return components.size();
+        if(!savedDraft)
+            return components.size();
+        else
+            return this.activeDraft.components.size();
     }
 
     public ArrayList<TemplateItem> getComponents(){

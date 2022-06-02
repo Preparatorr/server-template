@@ -1,6 +1,5 @@
 package com.matej.cshelper.db.entities;
 
-import com.matej.cshelper.db.DBDataManager;
 import com.matej.cshelper.db.ServerTemplates;
 
 import java.util.HashMap;
@@ -8,7 +7,7 @@ import java.util.HashMap;
 public class BuildDraft {
     public String orderID;
     public long templateID;
-    boolean finished = false;
+    public boolean finished = false;
     public HashMap<Integer,FilledComponent> components;
 
     public BuildDraft(long templateID){
@@ -23,7 +22,7 @@ public class BuildDraft {
         sb.append("Template name: ").append(ServerTemplates.getInstance().getBuildTemplate(templateID).displayName).append("\n");
         sb.append("Components: \n");
         for(Integer key : components.keySet()){
-            sb.append("  ").append(components.get(key).name).append(": ").append(components.get(key).toString()).append("\n");
+            sb.append("  ").append(components.get(key).displayName).append(": ").append(components.get(key).toString()).append("\n");
         }
         return sb.toString();
     }
