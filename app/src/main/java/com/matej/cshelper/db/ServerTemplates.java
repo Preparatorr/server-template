@@ -1,6 +1,9 @@
 package com.matej.cshelper.db;
 
 
+import com.matej.cshelper.db.entities.ServerOrder;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 //Singleton class for storing server templates
@@ -11,6 +14,8 @@ public class ServerTemplates {
     private DBDataManager.GlobalComponentsConfig globalComponents = null;
 
     private ArrayList<DBDataManager.ServerTemplate> templateItems = null;
+
+    private ArrayList<ServerOrder.OrderStep> orderSteps = null;
 
     private ServerTemplates() {
 
@@ -48,5 +53,11 @@ public class ServerTemplates {
         return templateItems;
     }
 
+    public ArrayList<ServerOrder.OrderStep> getOrderSteps() {
+        return this.orderSteps;
+    }
 
+    public void setOrderSteps(ArrayList<ServerOrder.OrderStep> orderSteps) {
+        this.orderSteps = orderSteps;
+    }
 }

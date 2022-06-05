@@ -50,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.nav_saved:
                         Navigation.findNavController(findViewById(R.id.fragmentContainerView)).navigate(R.id.savedDrafts);
                         break;
+                    case R.id.nav_orders:
+                        Navigation.findNavController(findViewById(R.id.fragmentContainerView)).navigate(R.id.ordersFragment);
+                        break;
                 }
                 return true;
             }

@@ -13,6 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.gson.Gson;
+import com.matej.cshelper.db.entities.ServerOrder;
 import com.matej.cshelper.db.entities.TemplateItem;
 
 import java.util.ArrayList;
@@ -83,6 +84,8 @@ public class DBDataManager {
                     }
                 });
 
+        saveOrderSteps();
+
     }
 
     public void saveBuildReport(String ID, String report) {
@@ -104,5 +107,27 @@ public class DBDataManager {
         Gson gson = new Gson();
         ServerTemplate template = gson.fromJson(templateString, ServerTemplate.class);
         ServerTemplates.getInstance().addBuildTemplate(template);
+    }
+
+    private void saveOrderSteps() {
+        DocumentReference globalConfigDoc = db.collection("configs").document("order_steps");
+        globalConfigDoc.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        String steps = document.getString("file");
+                        Gson gson = new Gson();
+                        ServerOrder order = gson.fromJson(steps, ServerOrder.class);
+                        ServerTemplates.getInstance().setOrderSteps(order.orderSteps);
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
     }
 }
