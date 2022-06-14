@@ -121,6 +121,7 @@ public class DBDataManager {
                         Gson gson = new Gson();
                         ServerOrder order = gson.fromJson(steps, ServerOrder.class);
                         ServerTemplates.getInstance().setOrderSteps(order.orderSteps);
+                        Log.i(TAG, "Downloaded order steps: " + steps);
                     } else {
                         Log.d(TAG, "No such document");
                     }

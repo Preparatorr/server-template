@@ -14,19 +14,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.matej.cshelper.db.DBDataManager;
 import com.matej.cshelper.db.ServerTemplates;
 import com.matej.cshelper.db.entities.ServerOrder;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class OrdersFragment extends Fragment {
 
@@ -34,6 +30,15 @@ public class OrdersFragment extends Fragment {
 
     public OrdersFragment() {
         // Required empty public constructor
+    }
+    public static class ActiveOrdersWrap{
+        public ArrayList<ServerOrder> activeOrders;
+        public ActiveOrdersWrap(ArrayList<ServerOrder> activeOrders){
+            this.activeOrders = activeOrders;
+        }
+        public ActiveOrdersWrap(){
+            this.activeOrders = new ArrayList<>();
+        }
     }
 
     private ArrayList<ServerOrder> activeOrders;
@@ -51,6 +56,7 @@ public class OrdersFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_orders, container, false);
+        LinearLayout list = view.findViewById(R.id.orders_container);
         FloatingActionButton fab = view.findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,59 +66,71 @@ public class OrdersFragment extends Fragment {
                 //        .setAction("Action", null).show();
             }
         });
+        for(ServerOrder order : this.activeOrders){
+            View activeOrder = inflater.inflate(R.layout.server_template_item, list, false);
+            ((TextView)activeOrder.findViewById(R.id.component_name)).setText(order.ticketId + " " + order.orderId);
+            activeOrder.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    showOrder(order);
+                }
+            });
+            list.addView(activeOrder);
+        }
         return view;
+    }
+
+    private void showOrder(ServerOrder order){
+        Bundle args = new Bundle();
+        args.putString(OrderProcessing.ARG_ORDER_ID, new Gson().toJson(order));
+        NavHostFragment.findNavController(this).navigate(R.id.orderProcessing, args);
     }
 
     public void createOrder(){
         ServerOrder order = new ServerOrder();
-        getOrderID(order);
-        getTicketID(order);
+        //getTicketID(order);
         for (ServerOrder.OrderStep step : ServerTemplates.getInstance().getOrderSteps()){
             order.orderSteps.add(step.Clone());
-            order.orderSteps.get(order.orderSteps.size()-1).mandatory = false;
+            Log.i(TAG, "createOrder: " + order.orderSteps.get(order.orderSteps.size()-1));
+            //order.orderSteps.get(order.orderSteps.size()-1).mandatory = false;
         }
         activeOrders.add(order);
-        NavHostFragment.findNavController(this).navigate(R.id.orderProcessing);
+        getOrderID(order);
+
     }
 
     private void getOrderID(ServerOrder order){
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Enter order number ");
-        final EditText input = new EditText(getContext());
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
+        builder.setTitle("Enter order number and ticket ID");
+        View view = getLayoutInflater().inflate(R.layout.order_dialog, null);
+        final EditText orderId = view.findViewById(R.id.edit_text_order_id);
+        final EditText ticketId = view.findViewById(R.id.edit_text_ticket_id);;
+
+        builder.setView(view);
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                String orderID = input.getText().toString();
+                String orderID = orderId.getText().toString();
                 order.orderId = orderID;
+                String ticketID = ticketId.getText().toString();
+                order.ticketId = ticketID;
+                saveOrders();
+                Bundle args = new Bundle();
+                args.putString(OrderProcessing.ARG_ORDER_ID, new Gson().toJson(order));
+                NavHostFragment.findNavController(getParentFragment()).navigate(R.id.orderProcessing, args);
                 }
         });
         builder.show();
     }
 
-    private void getTicketID(ServerOrder order){
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Enter ticket number ");
-        final EditText input = new EditText(getContext());
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String orderID = input.getText().toString();
-                order.ticketId = orderID;
-                saveOrders();
-            }
-        });
-        builder.show();
-    }
 
     private void saveOrders(){
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("orders", getActivity().MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         Gson gson = new Gson();
-        String json = gson.toJson(activeOrders);
+        ActiveOrdersWrap activeOrdersWrap = new ActiveOrdersWrap();
+        activeOrdersWrap.activeOrders = activeOrders;
+        String json = gson.toJson(activeOrdersWrap);
         Log.i(TAG, "saveOrders: " + activeOrders.size());
         editor.putString("activeOrders", json);
         editor.commit();
@@ -124,13 +142,17 @@ public class OrdersFragment extends Fragment {
         String json = sharedPreferences.getString("activeOrders", "");
         Log.i(TAG, json);
 
-        ServerOrder[] savedOrders = gson.fromJson(json, ServerOrder[].class);
+        ActiveOrdersWrap savedOrders = gson.fromJson(json, ActiveOrdersWrap.class);
+        if(savedOrders == null)
+            activeOrders = new ArrayList<>();
+        else
+            activeOrders = savedOrders.activeOrders;
 
-        activeOrders = savedOrders == null ? new ArrayList<ServerOrder>() : new ArrayList<>(Arrays.asList(savedOrders));
-        Log.i(TAG, "loadOrders: " + activeOrders.size());
+        //activeOrders = new ArrayList<>(Arrays.asList(savedOrders));
+        Log.i(TAG, "loadOrders size : " + activeOrders.size());
 
         for (ServerOrder order : activeOrders){
-            Log.i(TAG, "koko: ");
+            Log.i(TAG, "koko: "+ order.ticketId);
         }
     }
 }

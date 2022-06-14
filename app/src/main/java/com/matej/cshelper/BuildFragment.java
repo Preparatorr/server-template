@@ -44,19 +44,6 @@ public class BuildFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
-        /*if(DBDataManager.getInstance().isInitialized()) {
-            for (Map.Entry<String, ArrayList<String>> entry : DBDataManager.getInstance().getGlobalComponents().components_config.entrySet()) {
-                View layout = inflater.inflate(R.layout.item_template, container, false);
-                ((TextView)layout.findViewById(R.id.component_name)).setText(entry.getKey());
-                for(String item : entry.getValue()) {
-                    LinearLayout checkList = ((LinearLayout)layout.findViewById(R.id.check_list));
-                    CheckBox checkBox = new CheckBox(getContext());
-                    checkBox.setText(item);
-                    checkList.addView(checkBox);
-                }
-                ((LinearLayout)parentView.findViewById(R.id.orders_list)).addView(layout);
-            }
-        }*/
 
         return parentView;
     }

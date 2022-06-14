@@ -26,6 +26,10 @@ public class ServerOrder {
         public OrderStep Clone(){
             return new OrderStep(name, status, type, mandatory);
         }
+
+        public String toString(){
+            return name + " " + status + " " + type + " " + mandatory;
+        }
     }
 
     public String orderId;
