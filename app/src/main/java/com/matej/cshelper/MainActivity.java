@@ -7,12 +7,14 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.Navigation;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.Toolbar;
 
 import com.google.android.material.navigation.NavigationView;
 import com.matej.cshelper.db.DBDataManager;
+import com.matej.cshelper.redmine.RedmineServices;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,11 +23,13 @@ public class MainActivity extends AppCompatActivity {
     Toolbar toolbar;
     ActionBarDrawerToggle actionBarDrawerToggle;
 
+    private static Context context;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        context = getApplicationContext();
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.navigation_view);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.menu_open, R.string.menu_close);
@@ -58,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         DBDataManager.getInstance().Init();
+        RedmineServices.getInstance().Init();
 
     }
 
@@ -70,5 +75,9 @@ public class MainActivity extends AppCompatActivity {
     }
     public void setActionBarTitle(String title){
         setTitle(title);
+    }
+
+    public static Context getContext() {
+        return context;
     }
 }

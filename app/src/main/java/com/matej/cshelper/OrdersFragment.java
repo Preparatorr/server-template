@@ -117,6 +117,7 @@ public class OrdersFragment extends Fragment {
                 saveOrders();
                 Bundle args = new Bundle();
                 args.putString(OrderProcessing.ARG_ORDER_ID, new Gson().toJson(order));
+
                 NavHostFragment.findNavController(getParentFragment()).navigate(R.id.orderProcessing, args);
                 }
         });

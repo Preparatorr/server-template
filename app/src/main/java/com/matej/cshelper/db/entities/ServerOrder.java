@@ -1,5 +1,7 @@
 package com.matej.cshelper.db.entities;
 
+import com.matej.cshelper.redmine.RMIssue;
+
 import java.util.ArrayList;
 
 public class ServerOrder {
@@ -36,13 +38,15 @@ public class ServerOrder {
     public String ticketId;
     public boolean finished;
     public ArrayList<OrderStep> orderSteps;
+    public RMIssue redmineIssue;
 
 
-    public ServerOrder(String orderId, String ticketId, boolean finished, ArrayList<OrderStep> steps) {
+    public ServerOrder(String orderId, String ticketId, boolean finished, ArrayList<OrderStep> steps, RMIssue redmineIssue) {
         this.orderId = orderId;
         this.ticketId = ticketId;
         this.finished = finished;
         this.orderSteps = steps;
+        this.redmineIssue = redmineIssue;
     }
 
     public ServerOrder() {
@@ -60,6 +64,7 @@ public class ServerOrder {
         {
             clone.orderSteps.add(new OrderStep(step.name, step.status, step.type, step.mandatory));
         }
+        clone.redmineIssue = redmineIssue;
         return clone;
     }
 }

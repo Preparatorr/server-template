@@ -60,7 +60,22 @@ public class FillTemplateFragment extends Fragment {
         if (getArguments() != null) {
             this.templateID = getArguments().getLong(ARG_TEMPLATE_ID);
             this.orderID = getArguments().getString(ARG_SAVED_TEMPLATE, null);
-            this.savedTemplate = this.orderID != null;
+            if(this.orderID == null) {
+                throw new IllegalArgumentException("Order ID is null");
+            }
+
+            SharedPreferences sharedPreferences = getContext().getSharedPreferences("drafts", Context.MODE_PRIVATE);
+            HashMap<String, String> orders = (HashMap<String,String>)sharedPreferences.getAll();
+            Gson gson = new Gson();
+            for(Map.Entry<String, String> entry : orders.entrySet()) {
+                if(entry.getKey().equals(orderID)) {
+                    this.savedTemplate = true;
+                    this.orderID = entry.getKey();
+                    BuildDraft order = gson.fromJson(sharedPreferences.getString(orderID, ""), BuildDraft.class);
+                    this.adapter = new TemplateAdapter(order);
+                    ((MainActivity) getActivity()).setActionBarTitle(orderID);
+                }
+            }
         }
         Log.i(TAG, "onCreate " + this.templateID);
     }
@@ -75,7 +90,7 @@ public class FillTemplateFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.server_build_menu, menu);
+        inflater.inflate(R.menu.fill_template_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -83,11 +98,8 @@ public class FillTemplateFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
         switch (item.getItemId()) {
-            case R.id.finish_template:
+            case R.id.save_template:
                 saveTemplate();
-                return true;
-            case R.id.upload_template:
-                uploadTemplate();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -101,19 +113,11 @@ public class FillTemplateFragment extends Fragment {
         setHasOptionsMenu(true);
         View parentView = inflater.inflate(R.layout.fragment_fill_template, container, false);
 
-        if(savedTemplate) {
-            SharedPreferences sharedPreferences = getContext().getSharedPreferences("drafts", Context.MODE_PRIVATE);
-            Gson gson = new Gson();
-            BuildDraft order = gson.fromJson(sharedPreferences.getString(orderID, ""), BuildDraft.class);
-            this.adapter = new TemplateAdapter(order);
-            ((MainActivity) getActivity()).setActionBarTitle(orderID + " - " + ServerTemplates.getInstance().getBuildTemplate(templateID).displayName);
-
-        }
-        else {
+        if(!savedTemplate) {
             DBDataManager.ServerTemplate serverTemplate = ServerTemplates.getInstance().getBuildTemplate(this.templateID);
             this.adapter = new TemplateAdapter(serverTemplate);
             getMissingComponents(serverTemplate,adapter);
-            getOrderID();
+            adapter.activeDraft.orderID = this.orderID;
         }
         RecyclerView recyclerView = parentView.findViewById(R.id.components_list);
         recyclerView.setAdapter(adapter);
@@ -149,23 +153,6 @@ public class FillTemplateFragment extends Fragment {
         }
     }
 
-    private void getOrderID(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Enter order number ");
-        final EditText input = new EditText(getContext());
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String orderID = input.getText().toString();
-                adapter.activeDraft.orderID = orderID;
-                ((MainActivity) getActivity()).setActionBarTitle(orderID + " - " + ServerTemplates.getInstance().getBuildTemplate(templateID).displayName);
-            }
-        });
-        builder.show();
-    }
-
     private void saveTemplate() {
         adapter.activeDraft.templateID = this.templateID;
         Log.i(TAG, "saveTemplate: " + adapter.activeDraft.toString());
@@ -176,15 +163,8 @@ public class FillTemplateFragment extends Fragment {
         Log.i(TAG, "json: " + gson.toJson(adapter.activeDraft));
         editor.commit();
         Toast.makeText(getContext(), adapter.activeDraft.orderID + " Saved", Toast.LENGTH_SHORT).show();
-        NavHostFragment.findNavController(this).navigate(R.id.savedDrafts);
+        getParentFragmentManager().popBackStackImmediate();
     }
 
-    private void uploadTemplate(){
-        adapter.activeDraft.finished = true;
-        saveTemplate();
-        DBDataManager.getInstance().saveBuildReport(adapter.activeDraft.orderID, adapter.activeDraft.toString());
-        Toast.makeText(getContext(), adapter.activeDraft.orderID + " Uploaded", Toast.LENGTH_SHORT).show();
-        NavHostFragment.findNavController(this).navigate(R.id.savedDrafts);
-    }
 
 }
